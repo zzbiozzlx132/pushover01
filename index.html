@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Trình Cá Nhân</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #0d6efd;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        #status {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗓️ Lịch trình của bạn</h1>
+        <p>Hệ thống đang chạy ngầm để gửi thông báo đến điện thoại của bạn.</p>
+        <p id="status" style="color: #198754;">Trạng thái: Hoạt động</p>
+    </div>
+
+    <script>
+        // --- PHẦN LỊCH TRÌNH ---
+        const schedule = [
+            { time: "06:30", task: "Dậy thôi! Chuẩn bị cho một ngày mới nào!" },
+            { time: "07:00", task: "Đến giờ đi làm rồi, xuất phát thôi!" },
+            { time: "12:00", task: "Nghỉ trưa thôi! Nhớ ăn uống đầy đủ nhé." },
+            { time: "12:30", task: "Power Nap 15 phút hoặc lên kế hoạch chiều nay." },
+            { time: "17:15", task: "Tan làm rồi, lên xe về nhà cẩn thận nhé!" },
+            { time: "19:00", task: "Giờ Vàng Gia Đình! Chơi với con thôi." },
+            { time: "21:30", task: "Bắt đầu giờ 'Deep Work' cho tương lai!" },
+            { time: "22:45", task: "Tắt máy, bắt đầu 'Hạ nhiệt' để chuẩn bị ngủ." },
+            { time: "23:15", task: "Lên giường ngủ thôi! Chúc ngủ ngon." }
+        ];
+        
+        // --- KHÓA API CỦA BẠN (ĐÃ HOÀN THIỆN) ---
+        const PUSHOVER_USER_KEY = "u3sgdtzp1ebjy2ng5rbx9cuqmb3ryz";
+        const PUSHOVER_API_TOKEN = "akjdue2wh1srnctdk13jqsi8zd7tam";
+        // ------------------------------------
+
+        // Hàm gửi thông báo qua Pushover
+        function sendPushoverNotification(task) {
+            fetch("https://api.pushover.net/1/messages.json", {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    token: PUSHOVER_API_TOKEN,
+                    user: PUSHOVER_USER_KEY,
+                    title: "🔔 Nhắc nhở lịch trình!",
+                    message: task,
+                    sound: "pushover"
+                })
+            })
+            .then(response => {
+                if(response.ok) {
+                     console.log(`Thông báo "${task}" đã được gửi thành công!`);
+                } else {
+                     console.error("Gửi thông báo thất bại:", response.statusText);
+                }
+            })
+            .catch(error => console.error("Lỗi mạng:", error));
+        }
+
+        // Hàm kiểm tra lịch trình mỗi phút
+        function checkSchedule() {
+            const now = new Date();
+            const currentTime = now.getHours().toString().padStart(2, '0') + ":" + now.getMinutes().toString().padStart(2, '0');
+            console.log(`Kiểm tra lúc: ${currentTime}`);
+            const scheduledTask = schedule.find(item => item.time === currentTime);
+            if (scheduledTask) {
+                sendPushoverNotification(scheduledTask.task);
+            }
+        }
+
+        // Chạy kiểm tra mỗi 60 giây
+        setInterval(checkSchedule, 60000);
+    </script>
+</body>
+</html>
